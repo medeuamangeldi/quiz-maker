@@ -5,6 +5,7 @@ export async function registerUser(data: {
 }) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },

@@ -32,7 +32,9 @@ interface TestsState {
 export const fetchTests = createAsyncThunk<Test[]>(
   "tests/fetchTests",
   async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tests`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tests`, {
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch tests");
     }

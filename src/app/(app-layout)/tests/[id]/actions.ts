@@ -21,6 +21,7 @@ export async function fetchTestById(testId: number): Promise<Test> {
     `${process.env.NEXT_PUBLIC_API_URL}/tests/${testId}`,
     {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -55,6 +56,7 @@ export async function submitTest(
     `${process.env.NEXT_PUBLIC_API_URL}/tests/submit`,
     {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

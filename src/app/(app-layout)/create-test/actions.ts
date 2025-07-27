@@ -14,9 +14,9 @@ export async function createTestApi(
 ) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tests`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      // Add Authorization header if needed:
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
