@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+// ✅ JavaScript version
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  swcMinify: false,
+  // other settings...
 };
 
-export default nextConfig;
+module.exports = nextConfig;

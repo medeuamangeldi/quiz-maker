@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Got it! Here's a concise and clear README.md tailored for your **frontend** project, referencing your GitHub repo and focusing on usage, setup, and architecture:
 
-## Getting Started
+---
 
-First, run the development server:
+# QuizMaker Frontend
+
+Frontend application for **QuizMaker** — a platform to create and take interactive quizzes with various question types.
+
+## Repository
+
+```
+git@github.com:medeuamangeldi/quiz-maker.git
+```
+
+---
+
+## Project Description
+
+This frontend is built with **Next.js** and TypeScript. It provides user interfaces for:
+
+- Viewing a list of quizzes with search, filtering by tags, and pagination.
+- Taking quizzes with support for single-choice, multiple-choice, and text-answer questions.
+- Submitting answers to the backend and displaying detailed results.
+- Basic user interaction with loading and error handling.
+
+---
+
+## Installation and Setup
+
+1. Clone the repository:
+
+```bash
+git clone git@github.com:medeuamangeldi/quiz-maker.git
+cd quiz-maker/frontend
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create `.env.local` file in the frontend root with:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+Replace URL with your backend API endpoint.
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open your browser at `http://localhost:3001` (or the default Next.js port).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+- **Quiz List**: Search quizzes by title, filter by tags, with pagination.
+- **Quiz Detail**: Display questions of different types and options.
+- **Answer Submission**: Submit user answers securely to backend API.
+- **Result Feedback**: Show earned points and detailed per-question feedback.
+- **Loading and Error States**: Handle API loading and errors gracefully.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Sure! Here's the updated **Architectural Notes** section with Redux, thunk, and slices included:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Architectural Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Next.js** framework for React-based SSR and routing.
+- React Hooks (`useState`, `useEffect`) manage component state and side effects.
+- **Redux Toolkit** is used for global state management, organizing state into **slices**.
+- **Redux Thunk** middleware handles asynchronous actions like API calls.
+- Data fetching is done via API calls defined in the `actions.ts` module, dispatched through Redux async thunks.
+- User answers and other UI state are managed locally in components, while tests, filters, pagination, and search states are managed globally in Redux slices.
+- Authentication token (JWT) is stored in `localStorage` and sent in request headers.
+- The frontend does not directly call any external APIs; all calls are proxied through your backend API.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## How to Contribute
+
+- Fork the repo, create a branch, and open a Pull Request.
+- Follow the existing code style and commit message conventions.
+- Please test your changes locally before submitting.
+
+---
+
+## Contact
+
+For questions or suggestions, open an issue or contact Medeu Amangeldi. telegram: @medeuedem
+
+---
