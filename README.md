@@ -1,5 +1,3 @@
-Got it! Here's a concise and clear README.md tailored for your **frontend** project, referencing your GitHub repo and focusing on usage, setup, and architecture:
-
 ---
 
 # QuizMaker Frontend
