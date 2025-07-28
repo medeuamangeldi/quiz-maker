@@ -41,19 +41,26 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Добро пожаловать в QuizMaker!</h1>
+    <div className="container mt-4">
+      <h1 className="mb-4">Добро пожаловать в QuizMaker!</h1>
 
-      <h2 className="mt-6 text-xl font-semibold">🏆 Топ пользователей</h2>
+      <h2 className="mb-3">🏆 Топ пользователей</h2>
       {loading ? (
         <p>Загрузка рейтинга...</p>
       ) : (
-        <ul className="mt-2 space-y-2">
+        <ul className="list-group">
           {rankings.slice(0, 10).map((user, index) => (
-            <li key={user.id} className="border p-2 rounded shadow">
-              <strong>#{index + 1}</strong> — {user.username} —{" "}
-              {user.totalEarned}
-              {getPointsLabel(user.totalEarned)} — {user.averageScore}%
+            <li
+              key={user.id}
+              className="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <strong>#{index + 1}</strong> — {user.username}
+              </div>
+              <div>
+                {user.totalEarned} {getPointsLabel(user.totalEarned)} —{" "}
+                {user.averageScore}%
+              </div>
             </li>
           ))}
         </ul>
