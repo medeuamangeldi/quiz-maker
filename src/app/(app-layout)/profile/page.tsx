@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { useRouter } from "next/navigation";
+import { getPointsLabel } from "@/helpers/getPointsLabel";
 
 type TestSubmission = {
   id: number;
@@ -10,6 +12,14 @@ type TestSubmission = {
   earnedPoints: number;
   totalPoints: number;
   createdAt: string;
+};
+
+type UserRanking = {
+  rank: number;
+  totalUsers: number;
+  totalEarned: number;
+  totalPossible: number;
+  averageScore: number;
 };
 
 type UserData = {
@@ -23,6 +33,12 @@ export default function ProfilePage() {
   const identifier = useSelector((state: RootState) => state.auth.identifier);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ranking, setRanking] = useState<UserRanking | null>(null);
+  const route = useRouter();
+
+  const handleGoToTestById = (testId: number) => {
+    route.push(`/tests/${testId}`);
+  };
 
   useEffect(() => {
     const fetchMe = async () => {
@@ -45,7 +61,28 @@ export default function ProfilePage() {
       }
     };
 
-    fetchMe();
+    const fetchRanking = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/users/my-ranking`,
+          {
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch user ranking");
+        const data = await res.json();
+        setRanking(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchMe().then(fetchRanking);
   }, []);
 
   return (
@@ -61,8 +98,17 @@ export default function ProfilePage() {
         </strong>
       </p>
 
-      <p>Рейтинг: 12345 (заглушка)</p>
-      <p>Прогресс и достижения — будут добавлены позже</p>
+      <p>
+        Рейтинг:{" "}
+        {ranking ? (
+          <>
+            #{ranking.rank} из {ranking.totalUsers} • {ranking.totalEarned}{" "}
+            баллов • средний {ranking.averageScore}%
+          </>
+        ) : (
+          "Загрузка рейтинга..."
+        )}
+      </p>
 
       <hr />
 
@@ -71,20 +117,48 @@ export default function ProfilePage() {
       {loading ? (
         <p>Загрузка...</p>
       ) : userData?.testSubmissions?.length ? (
-        <ul className="list-unstyled">
-          {userData.testSubmissions.map((submission) => (
-            <li key={submission.id}>
-              📝 Тест #{submission.testId}:{" "}
-              <strong>
-                {submission.earnedPoints}/{submission.totalPoints} баллов
-              </strong>{" "}
-              —{" "}
-              <span className="text-muted">
-                {new Date(submission.createdAt).toLocaleString()}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="space-y-4">
+          {userData.testSubmissions.map((submission) => {
+            const percentage =
+              (submission.earnedPoints / submission.totalPoints) * 100;
+
+            let scoreColor = "text-red-600";
+            if (percentage >= 80) scoreColor = "text-green-600";
+            else if (percentage >= 50) scoreColor = "text-yellow-600";
+
+            return (
+              <div
+                key={submission.id}
+                onClick={() => handleGoToTestById(submission.testId)}
+                style={{
+                  cursor: "pointer",
+                  border: "1px solid #ccc",
+                  marginBottom: 12,
+                  padding: 12,
+                  transition: "background-color 0.2s",
+                  borderRadius: 6,
+                }}
+                className="cursor-pointer border-b border-gray-200 py-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">
+                      Тест #{submission.testId}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(submission.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div className={`text-sm font-semibold ${scoreColor}`}>
+                    {submission.earnedPoints}/{submission.totalPoints}{" "}
+                    {getPointsLabel(submission.earnedPoints)}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <p className="text-muted">Нет пройденных тестов</p>
       )}

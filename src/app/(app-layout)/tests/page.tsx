@@ -11,6 +11,7 @@ import {
 } from "@/store/slices/testsSlice";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getPointsLabel } from "@/helpers/getPointsLabel";
 
 export default function TestsPage() {
   const dispatch = useDispatch();
@@ -104,7 +105,8 @@ export default function TestsPage() {
               {test.testSubmissions && test.testSubmissions.length > 0 ? (
                 <div className="text-success">
                   ✅ Ваш результат: {test.testSubmissions[0].earnedPoints}/
-                  {test.testSubmissions[0].totalPoints} баллов —
+                  {test.testSubmissions[0].totalPoints}{" "}
+                  {getPointsLabel(test.testSubmissions[0].totalPoints)} —
                   <span className="text-muted ms-2">
                     {new Date(
                       test.testSubmissions[0].createdAt

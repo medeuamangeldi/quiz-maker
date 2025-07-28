@@ -1,5 +1,6 @@
 "use client";
 
+import { getPointsLabel } from "@/helpers/getPointsLabel";
 import { useEffect, useState } from "react";
 
 type RankingUser = {
@@ -52,13 +53,7 @@ export default function DashboardPage() {
             <li key={user.id} className="border p-2 rounded shadow">
               <strong>#{index + 1}</strong> — {user.username} —{" "}
               {user.totalEarned}
-              {" балл" +
-                (user.totalEarned === 0 || user.totalEarned >= 5
-                  ? "ов"
-                  : user.totalEarned != 1
-                  ? "а"
-                  : "")}{" "}
-              — {user.averageScore}%
+              {getPointsLabel(user.totalEarned)} — {user.averageScore}%
             </li>
           ))}
         </ul>
