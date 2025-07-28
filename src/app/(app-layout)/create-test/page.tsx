@@ -193,9 +193,9 @@ export default function CreateTestPage() {
 
       {mode === "ai" ? (
         <AiCreateTest
-          onTestCreated={(generatedTest: any) => {
-            setTest(generatedTest);
-            setMode("manual");
+          onTestCreated={() => {
+            alert("Тест успешно добавлен!");
+            router.push("/tests");
           }}
         />
       ) : (

@@ -20,7 +20,7 @@ interface Test {
 }
 
 interface AiCreateTestProps {
-  onTestCreated: (test: Test) => void;
+  onTestCreated: () => void;
 }
 
 export default function AiCreateTest({ onTestCreated }: AiCreateTestProps) {
@@ -45,12 +45,12 @@ export default function AiCreateTest({ onTestCreated }: AiCreateTestProps) {
 
     try {
       const token = localStorage.getItem("token") || "";
-      const generatedTest = await createTestWithAiApi(token, {
+      await createTestWithAiApi(token, {
         topic,
         numberOfQuestions,
         specialInstructions,
       });
-      onTestCreated(generatedTest);
+      onTestCreated();
     } catch (err: any) {
       setError(err.message || "Ошибка при генерации теста");
     } finally {
