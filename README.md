@@ -1,10 +1,10 @@
----
-
 # QuizMaker Frontend
 
-Frontend application for **QuizMaker** — a platform to create and take interactive quizzes with various question types.
+**QuizMaker** — это платформа для создания и прохождения интерактивных тестов с различными типами вопросов: с одним правильным ответом, с несколькими, и текстовыми ответами.
 
-## Repository
+---
+
+## Репозиторий
 
 ```
 git@github.com:medeuamangeldi/quiz-maker.git
@@ -12,87 +12,156 @@ git@github.com:medeuamangeldi/quiz-maker.git
 
 ---
 
-## Project Description
+## Описание проекта
 
-This frontend is built with **Next.js** and TypeScript. It provides user interfaces for:
+Данное frontend-приложение построено с использованием **Next.js** и **TypeScript**. Оно реализует:
 
-- Viewing a list of quizzes with search, filtering by tags, and pagination.
-- Taking quizzes with support for single-choice, multiple-choice, and text-answer questions.
-- Submitting answers to the backend and displaying detailed results.
-- Basic user interaction with loading and error handling.
+- Список тестов с фильтрацией, поиском и пагинацией.
+- Прохождение тестов с отображением различных типов вопросов.
+- Отправку ответов пользователя и отображение результатов.
+- Возможность регистрации и авторизации пользователей.
+- Отображение статистики пользователя на дашборде.
 
 ---
 
-## Installation and Setup
+## Создание тестов с помощью ИИ
 
-1. Clone the repository:
+**QuizMaker** предоставляет возможность **автоматической генерации тестов** с помощью **OpenAI ChatGPT**. Вы можете указать:
+
+- Тему теста
+- Количество вопросов
+- Типы вопросов (с одним правильным ответом, множественным выбором, текстовые)
+
+После отправки запроса, система сгенерирует вопросы и варианты ответов, которые можно отредактировать и сохранить в базу.
+
+### Пример использования
+
+1. Перейдите на страницу создания теста.
+2. Выберите опцию "Создать с помощью ИИ".
+3. Введите тему, количество вопросов и желаемые типы.
+4. Нажмите "Сгенерировать".
+5. Отредактируйте или сохраните предложенные вопросы.
+
+> ⚠️ Генерация требует подключения к API OpenAI и действующего ключа в backend.
+
+---
+
+## Как это работает
+
+- Фронтенд отправляет параметры генерации на endpoint `/ai/generate-test`.
+- Backend использует OpenAI API для генерации структуры теста.
+- Полученный тест очищается от технических полей (`id`, `createdAt`, `testId`) и возвращается на фронт.
+- Пользователь может изменить, удалить или отправить сгенерированный тест в базу.
+
+---
+
+## Инструкции по установке и запуску
+
+1. Клонируйте репозиторий:
 
 ```bash
 git clone git@github.com:medeuamangeldi/quiz-maker.git
 cd quiz-maker/frontend
 ```
 
-2. Install dependencies:
+2. Установите зависимости:
 
 ```bash
 npm install
 ```
 
-3. Create `.env.local` file in the frontend root with:
+3. Создайте файл `.env.local` в корне проекта:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3013
 ```
 
-Replace URL with your backend API endpoint.
+Замените URL на адрес вашего backend API.
 
-4. Run the development server:
+4. Запустите приложение:
 
 ```bash
 npm run dev
 ```
 
-5. Open your browser at `http://localhost:3001` (or the default Next.js port).
+5. Откройте в браузере: `http://localhost:3001` или по умолчанию `http://localhost:3000`.
 
 ---
 
-## Features
+## Особенности
 
-- **Quiz List**: Search quizzes by title, filter by tags, with pagination.
-- **Quiz Detail**: Display questions of different types and options.
-- **Answer Submission**: Submit user answers securely to backend API.
-- **Result Feedback**: Show earned points and detailed per-question feedback.
-- **Loading and Error States**: Handle API loading and errors gracefully.
-
----
-
-Sure! Here's the updated **Architectural Notes** section with Redux, thunk, and slices included:
+- **Список тестов** с возможностью поиска и фильтрации.
+- **Прохождение тестов** с вопросами разных типов.
+- **Отправка ответов** на сервер и получение результатов.
+- **Отображение результатов** по каждому вопросу (правильный/неправильный, количество баллов).
+- **Регистрация и вход в систему**, хранение токена JWT.
+- **Дашборд пользователя** с краткой статистикой.
+- Обработка состояний загрузки и ошибок при запросах.
 
 ---
 
-## Architectural Notes
+## Архитектура приложения
 
-- **Next.js** framework for React-based SSR and routing.
-- React Hooks (`useState`, `useEffect`) manage component state and side effects.
-- **Redux Toolkit** is used for global state management, organizing state into **slices**.
-- **Redux Thunk** middleware handles asynchronous actions like API calls.
-- Data fetching is done via API calls defined in the `actions.ts` module, dispatched through Redux async thunks.
-- User answers and other UI state are managed locally in components, while tests, filters, pagination, and search states are managed globally in Redux slices.
-- Authentication token (JWT) is stored in `localStorage` and sent in request headers.
-- The frontend does not directly call any external APIs; all calls are proxied through your backend API.
+- **Next.js** используется как фреймворк на базе React с серверным рендерингом и маршрутизацией.
+- Используются **React Hooks**: `useState`, `useEffect`, `useSelector`, `useDispatch`.
+- Для глобального состояния используется **Redux Toolkit**, данные разделены на **slices** (тесты, фильтры и т.д.).
+- **Redux Thunk** применён для асинхронных операций (например, запросов к API).
+- Все взаимодействия с backend реализованы через `actions.ts` с помощью асинхронных thunk-функций.
+- Токен аутентификации хранится в `localStorage` и автоматически прикрепляется к каждому запросу.
 
 ---
 
-## How to Contribute
+## Уникальные подходы
 
-- Fork the repo, create a branch, and open a Pull Request.
-- Follow the existing code style and commit message conventions.
-- Please test your changes locally before submitting.
+- Использован **типизированный Redux Toolkit** для упрощения масштабирования и поддержки кода.
+- Унифицированная логика обработки разных типов вопросов при создании и прохождении тестов.
+- Реализовано автоматическое **очищение полей**, таких как `id`, `createdAt`, `updatedAt`, перед отправкой тестов на backend.
+- Экраны формы создания вопросов работают **динамически**, настраиваемые пользователем.
+- Используется структура данных, позволяющая быстро интегрировать новые типы вопросов в будущем.
 
 ---
 
-## Contact
+## Компромиссы и принятые решения
 
-For questions or suggestions, open an issue or contact Medeu Amangeldi. telegram: @medeuedem
+- Вместо использования Formik/Yup была выбрана ручная валидация форм через `useState` и `useEffect` для большей гибкости.
+- Выбор между GraphQL и REST: из-за простоты backend был выбран **REST API**.
+- Не реализована авторизация через внешние провайдеры (Google, GitHub) для упрощения логики входа.
+- UI пока минималистичен (базовый bootstrap, css), фокус на функциональность.
+
+---
+
+## Известные проблемы и ошибки
+
+- Валидация форм не охватывает все edge-cases (например, отсутствие всех вариантов ответа).
+- Нет локализации/мультиязычности.
+- При медленном соединении возможны задержки отображения ответов (нет глобального спиннера).
+
+---
+
+## Почему выбран этот технический стек
+
+- **Next.js** — оптимален для SSR, упрощённой маршрутизации и хорош для масштабируемых frontend-проектов.
+- **TypeScript** — для типизации и предотвращения ошибок во время разработки.
+- **Redux Toolkit + Thunk** — упрощает управление глобальным состоянием и асинхронной логикой.
+- **Tailwind CSS** — позволяет быстро и эффективно верстать UI без написания большого количества CSS-кода.
+- **React** — благодаря компонентному подходу и богатой экосистеме, хорошо подходит для динамических форм.
+
+---
+
+## Как внести вклад
+
+- Сделайте форк репозитория.
+- Создайте новую ветку: `git checkout -b feature/ваша-фича`
+- Протестируйте изменения локально.
+- Отправьте Pull Request с описанием изменений.
+
+---
+
+## Контакты
+
+Если у вас есть вопросы или предложения:
+
+- Telegram: [@medeuedem](https://t.me/medeuedem)
+- GitHub Issues: откройте issue в репозитории
 
 ---
