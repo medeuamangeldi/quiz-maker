@@ -2,6 +2,8 @@
 
 **QuizMaker** — это платформа для создания и прохождения интерактивных тестов с различными типами вопросов: с одним правильным ответом, с несколькими, и текстовыми ответами.
 
+### Backend repository: https://github.com/medeuamangeldi/quiz-maker-api
+
 ## Deploy link: https://quiz-maker-mu.vercel.app/
 
 ## Репозиторий
