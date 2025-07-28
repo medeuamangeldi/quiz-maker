@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { fetchTestById, submitTest, Test } from "./actions";
-
+import { fetchTopPerformers } from "./actions";
 export default function TestDetailPage() {
   const { id } = useParams();
   const [test, setTest] = useState<Test | null>(null);
@@ -14,36 +14,58 @@ export default function TestDetailPage() {
   const [result, setResult]: any = useState();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [topPerformers, setTopPerformers] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadTestData = async () => {
     if (!id) return;
 
     setLoading(true);
     setError(null);
     setResult(null);
     setUserAnswers({});
+    setTopPerformers([]);
 
-    fetchTestById(Number(id))
-      .then((data) => {
-        setTest(data);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    const token = localStorage.getItem("token") || "";
+
+    try {
+      const data = await fetchTestById(token, Number(id));
+      setTest(data);
+
+      const submission = data.testSubmissions?.[0];
+      if (submission) {
+        setResult({
+          earnedPoints: submission.earnedPoints,
+          totalPoints: submission.totalPoints,
+          answers: submission.answers,
+        });
+
+        const answered: Record<string, string[]> = {};
+        submission.answers.forEach((a: any) => {
+          answered[a.questionId] = a.answers;
+        });
+        setUserAnswers(answered);
+      }
+
+      const performers = await fetchTopPerformers(token, Number(id));
+      setTopPerformers(performers);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTestData();
   }, [id]);
-
-  if (loading) return <p>Загрузка теста...</p>;
-  if (error) return <p>Ошибка: {error}</p>;
-  if (!test) return <p>Тест не найден</p>;
 
   const handleOptionChange = (
     questionId: string,
     option: string,
     type: "single" | "multiple"
   ) => {
+    if (result) return;
+
     setUserAnswers((prev) => {
       const prevAnswers = prev[questionId] || [];
 
@@ -72,14 +94,19 @@ export default function TestDetailPage() {
 
     try {
       const token = localStorage.getItem("token") || "";
-      const data = await submitTest(token, Number(id), userAnswers);
-      setResult(data);
+      await submitTest(token, Number(id), userAnswers);
+
+      await loadTestData();
     } catch (e: any) {
       setSubmitError(e.message);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (loading) return <p>Загрузка теста...</p>;
+  if (error) return <p>Ошибка: {error}</p>;
+  if (!test) return <p>Тест не найден</p>;
 
   return (
     <div>
@@ -110,6 +137,7 @@ export default function TestDetailPage() {
                             q.type as "single" | "multiple"
                           )
                         }
+                        disabled={!!result}
                         style={{ marginRight: 8 }}
                       />
                       {opt}
@@ -125,11 +153,13 @@ export default function TestDetailPage() {
                 placeholder="Введите ответ"
                 value={userAnswers[q.id]?.[0] || ""}
                 onChange={(e) =>
+                  !result &&
                   setUserAnswers((prev) => ({
                     ...prev,
                     [q.id]: [e.target.value],
                   }))
                 }
+                disabled={!!result}
                 style={{ marginTop: 8, width: "100%", padding: 6 }}
               />
             )}
@@ -137,18 +167,20 @@ export default function TestDetailPage() {
         ))}
       </ul>
 
-      <button
-        onClick={handleSubmit}
-        disabled={submitting}
-        style={{
-          marginTop: 20,
-          padding: "10px 20px",
-          fontSize: 16,
-          cursor: "pointer",
-        }}
-      >
-        {submitting ? "Отправка..." : "Отправить тест"}
-      </button>
+      {!result && (
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          style={{
+            marginTop: 20,
+            padding: "10px 20px",
+            fontSize: 16,
+            cursor: "pointer",
+          }}
+        >
+          {submitting ? "Отправка..." : "Отправить тест"}
+        </button>
+      )}
 
       {submitError && <p style={{ color: "red" }}>Ошибка: {submitError}</p>}
 
@@ -158,28 +190,51 @@ export default function TestDetailPage() {
           <p>
             Набранные баллы: {result.earnedPoints} / {result.totalPoints}
           </p>
+
           <ul>
-            {result.detailedResults.map((res: any) => {
-              const question = test.questions.find(
-                (q) => q.id === res.questionId
+            {test.questions.map((q) => {
+              const answerEntry = result.answers?.find(
+                (a: any) => Number(a.questionId) === (q.id as any)
               );
+              const correctAnswers = q.correctAnswers;
+
+              const isCorrect =
+                JSON.stringify(answerEntry?.answers.sort()) ===
+                JSON.stringify(correctAnswers.sort());
+
               return (
-                <li key={res.questionId} style={{ marginBottom: 8 }}>
-                  <strong>{question?.text}</strong> —{" "}
-                  {res.correct ? (
-                    <span style={{ color: "green" }}>
-                      Верно (+{res.earnedPoints} из {res.totalPoints})
-                    </span>
+                <li key={q.id} style={{ marginBottom: 8 }}>
+                  <strong>{q.text}</strong> —{" "}
+                  {isCorrect ? (
+                    <span style={{ color: "green" }}>Верно</span>
                   ) : (
                     <span style={{ color: "red" }}>Неверно</span>
                   )}
-                  {res.message && <div>Комментарий: {res.message}</div>}
+                  <div>Ваш ответ: {answerEntry?.answers.join(", ")}</div>
+                  <div>Правильный ответ: {correctAnswers.join(", ")}</div>
                 </li>
               );
             })}
           </ul>
         </div>
       )}
+
+      {/* Top performers list */}
+      <div style={{ marginTop: 40 }}>
+        <h2>Лучшие результаты по тесту</h2>
+        {topPerformers.length === 0 ? (
+          <p>Нет результатов для отображения</p>
+        ) : (
+          <ol>
+            {topPerformers.map((p) => (
+              <li key={p.userId} style={{ marginBottom: 8 }}>
+                <strong>{p.username}</strong> — {p.earnedPoints} /{" "}
+                {p.totalPoints} баллов
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </div>
   );
 }

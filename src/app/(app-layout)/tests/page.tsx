@@ -21,12 +21,10 @@ export default function TestsPage() {
   const [searchTerm, setSearchTerm] = useState(search);
   const [tagFilter, setTagFilter] = useState(filter);
 
-  // Fetch tests from backend on mount
   useEffect(() => {
     dispatch(fetchTests() as any);
   }, [dispatch]);
 
-  // Sync local states with redux store changes (helps keep inputs controlled)
   useEffect(() => {
     setSearchTerm(search);
   }, [search]);
@@ -35,19 +33,16 @@ export default function TestsPage() {
     setTagFilter(filter);
   }, [filter]);
 
-  // Filters
   const filteredTests = tests
     .filter((t) => (tagFilter ? t.tags.includes(tagFilter) : true))
     .filter((t) => t.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Pagination
   const pageCount = Math.ceil(filteredTests.length / pageSize);
   const pagedTests = filteredTests.slice(
     (page - 1) * pageSize,
     page * pageSize
   );
 
-  // Unique tags for filter dropdown
   const uniqueTags = Array.from(new Set(tests.flatMap((t) => t.tags)));
 
   if (loading) return <p>Загрузка тестов...</p>;
@@ -96,15 +91,29 @@ export default function TestsPage() {
           pagedTests.map((test) => (
             <li
               key={test.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
+              className="list-group-item d-flex justify-content-between flex-column align-items-start"
             >
               <Link
                 href={`/tests/${test.id}`}
-                className="text-decoration-none flex-grow-1"
+                className="text-decoration-none mb-2 w-100"
               >
-                <strong>{test.title}</strong> — Теги: {test.tags.join(", ")}
+                <strong>{test.title}</strong> — Теги: {test.tags.join(", ")} —
+                Вопросов: {test.questions.length}
               </Link>
-              <div>Вопросов: {test.questions.length}</div>
+
+              {test.testSubmissions && test.testSubmissions.length > 0 ? (
+                <div className="text-success">
+                  ✅ Ваш результат: {test.testSubmissions[0].earnedPoints}/
+                  {test.testSubmissions[0].totalPoints} баллов —
+                  <span className="text-muted ms-2">
+                    {new Date(
+                      test.testSubmissions[0].createdAt
+                    ).toLocaleString()}
+                  </span>
+                </div>
+              ) : (
+                <div className="text-muted">Нет результатов</div>
+              )}
             </li>
           ))
         ) : (

@@ -1,5 +1,3 @@
-// actions.ts
-
 export interface Question {
   id: string;
   text: string;
@@ -9,14 +7,41 @@ export interface Question {
   points: number;
 }
 
+export interface TestSubmission {
+  id: string;
+  userId: string;
+  earnedPoints: number;
+  totalPoints: number;
+  createdAt: string;
+  answers: {
+    questionId: string;
+    answers: string[];
+  }[];
+}
+
 export interface Test {
   id: number;
   title: string;
   tags: string[];
   questions: Question[];
+  testSubmissions?: TestSubmission[];
 }
 
-export async function fetchTestById(testId: number): Promise<Test> {
+export async function fetchTopPerformers(token: string, testId: number) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/users/${testId}/top-performers`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to fetch top performers");
+  return res.json();
+}
+
+export async function fetchTestById(
+  token: string,
+  testId: number
+): Promise<Test> {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/tests/${testId}`,
     {
@@ -24,6 +49,7 @@ export async function fetchTestById(testId: number): Promise<Test> {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     }
   );

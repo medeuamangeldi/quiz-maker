@@ -2,18 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { login } from "@/store/slices/authSlice";
-import { registerUser } from "@/app/register/actions"; // or inline if not using actions.ts
+import { registerUser } from "@/app/register/actions";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
-  const [identifier, setIdentifier] = useState(""); // email
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +33,10 @@ export default function RegisterPage() {
         password,
       });
 
-      console.log("Registration result:", result);
+      if (result?.id) {
+        router.push("/login");
+      }
 
-      localStorage.setItem("token", result.token); // or result.access_token
-      dispatch(login({ identifier, token: result.token }));
-      router.push("/dashboard");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       alert((error.message as string) || "Ошибка регистрации");

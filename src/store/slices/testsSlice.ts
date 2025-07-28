@@ -8,8 +8,15 @@ export interface Question {
   text: string;
   type: QuestionType;
   options?: string[];
-  correctAnswers: string[]; // option strings or text answers
+  correctAnswers: string[];
   points: number;
+}
+export interface TestSubmission {
+  id: string;
+  userId: string;
+  earnedPoints: number;
+  totalPoints: number;
+  createdAt: string;
 }
 
 export interface Test {
@@ -17,6 +24,7 @@ export interface Test {
   title: string;
   tags: string[];
   questions: Question[];
+  testSubmissions?: TestSubmission[];
 }
 
 interface TestsState {
@@ -32,8 +40,13 @@ interface TestsState {
 export const fetchTests = createAsyncThunk<Test[]>(
   "tests/fetchTests",
   async () => {
+    const token = localStorage.getItem("token");
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tests`, {
       credentials: "include",
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+        "Content-Type": "application/json",
+      },
     });
     if (!response.ok) {
       throw new Error("Failed to fetch tests");
