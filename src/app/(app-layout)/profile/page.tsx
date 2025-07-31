@@ -41,8 +41,9 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
     const fetchMe = async () => {
-      const token = localStorage.getItem("token");
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
           credentials: "include",
@@ -51,7 +52,16 @@ export default function ProfilePage() {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (res.status === 401) {
+          console.warn("Unauthorized: redirecting to login...");
+          localStorage.removeItem("token");
+          route.push("/login");
+          return;
+        }
+
         if (!res.ok) throw new Error("Failed to fetch user info");
+
         const data = await res.json();
         setUserData(data);
       } catch (err) {
@@ -62,7 +72,6 @@ export default function ProfilePage() {
     };
 
     const fetchRanking = async () => {
-      const token = localStorage.getItem("token");
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/my-ranking`,
@@ -74,7 +83,16 @@ export default function ProfilePage() {
             },
           }
         );
+
+        if (res.status === 401) {
+          console.warn("Unauthorized: redirecting to login...");
+          localStorage.removeItem("token");
+          route.push("/login");
+          return;
+        }
+
         if (!res.ok) throw new Error("Failed to fetch user ranking");
+
         const data = await res.json();
         setRanking(data);
       } catch (err) {
@@ -83,7 +101,7 @@ export default function ProfilePage() {
     };
 
     fetchMe().then(fetchRanking);
-  }, []);
+  }, [route]);
 
   return (
     <div>
@@ -93,7 +111,7 @@ export default function ProfilePage() {
         Имя пользователя / Email:{" "}
         <strong>
           {userData
-            ? `${userData.username} / ${userData.email}`
+            ? `${userData?.username} / ${userData?.email}`
             : identifier ?? "Гость"}
         </strong>
       </p>
@@ -118,7 +136,7 @@ export default function ProfilePage() {
         <p>Загрузка...</p>
       ) : userData?.testSubmissions?.length ? (
         <div className="space-y-4">
-          {userData.testSubmissions.map((submission) => {
+          {userData?.testSubmissions.map((submission) => {
             const percentage =
               (submission.earnedPoints / submission.totalPoints) * 100;
 

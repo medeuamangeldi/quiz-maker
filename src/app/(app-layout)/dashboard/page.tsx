@@ -1,6 +1,7 @@
 "use client";
 
 import { getPointsLabel } from "@/helpers/getPointsLabel";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type RankingUser = {
@@ -13,6 +14,7 @@ type RankingUser = {
 export default function DashboardPage() {
   const [rankings, setRankings] = useState<RankingUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const route = useRouter();
 
   useEffect(() => {
     async function fetchRankings() {
@@ -28,6 +30,18 @@ export default function DashboardPage() {
             },
           }
         );
+
+        if (res.status === 401) {
+          console.warn("Unauthorized. Redirecting to login...");
+          localStorage.removeItem("token");
+          route.push("/login");
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
         setRankings(data);
       } catch (error) {
@@ -47,9 +61,9 @@ export default function DashboardPage() {
       <h2 className="mb-3">🏆 Топ пользователей</h2>
       {loading ? (
         <p>Загрузка рейтинга...</p>
-      ) : (
+      ) : rankings?.length > 0 ? (
         <ul className="list-group">
-          {rankings.slice(0, 10).map((user, index) => (
+          {rankings?.slice(0, 10).map((user, index) => (
             <li
               key={user.id}
               className="list-group-item d-flex justify-content-between align-items-center"
@@ -58,13 +72,13 @@ export default function DashboardPage() {
                 <strong>#{index + 1}</strong> — {user.username}
               </div>
               <div>
-                {user.totalEarned} {getPointsLabel(user.totalEarned)} —{" "}
-                {user.averageScore}%
+                {user?.totalEarned} {getPointsLabel(user.totalEarned)} —{" "}
+                {user?.averageScore}%
               </div>
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
     </div>
   );
 }
